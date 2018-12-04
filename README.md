@@ -1,1 +1,1 @@
-# Quo-vadis-Quax
+# Quo vadis Quax
