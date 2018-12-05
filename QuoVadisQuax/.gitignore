@@ -40,3 +40,6 @@ sysinfo.txt
 
 # Crashlytics generated file
 Assets/StreamingAssets/crashlytics-build.properties
+
+# Temp files
+~$TestValues.xlsx

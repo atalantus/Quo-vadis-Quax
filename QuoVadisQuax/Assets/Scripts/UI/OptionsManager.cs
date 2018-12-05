@@ -20,6 +20,7 @@ public class OptionsManager : MonoBehaviour
 
     [SerializeField] private AlgorithmManager _algorithmManager;
     [SerializeField] private Text[] _algorithmResults;
+    [SerializeField] private InputField[] _algorithmResultsCopy;
 
     /// <summary>
     ///     The world position of the option panel when closed
@@ -56,10 +57,12 @@ public class OptionsManager : MonoBehaviour
     private void Start()
     {
         _loadImage.UpdatedLoadingState += OnLoadingState_Changed;
-        _algorithmManager.FinishedAlgorithm += (foundPath, flights, time) =>
+        _algorithmManager.FinishedAlgorithm += (foundPath, flights, algTime, excTime) =>
         {
             UpdateAlgorithmResults(foundPath ? "YES" : "NO", flights.ToString(),
-                time.Minutes + "m " + time.Seconds + "s " + time.Milliseconds + "ms");
+                algTime.Minutes + "m " + algTime.Seconds + "s " + algTime.Milliseconds + "ms",
+                excTime.Minutes + "m " + excTime.Seconds + "s " + excTime.Milliseconds + "ms",
+                algTime.TotalMilliseconds, excTime.TotalMilliseconds);
         };
     }
 
@@ -91,14 +94,19 @@ public class OptionsManager : MonoBehaviour
         _guiCoordinates[2].text = MapDataManager.Instance.CityPosition.X.ToString();
         _guiCoordinates[3].text = MapDataManager.Instance.CityPosition.Y.ToString();
 
-        UpdateAlgorithmResults("-", "-", "-");
+        UpdateAlgorithmResults("-", "-", "-", "-", -1, -1);
     }
 
-    private void UpdateAlgorithmResults(string foundPath, string flights, string time)
+    private void UpdateAlgorithmResults(string foundPath, string flights, string algTime, string excTime,
+        double algTimeMs, double excTimeMs)
     {
         _algorithmResults[0].text = foundPath;
         _algorithmResults[1].text = flights;
-        _algorithmResults[2].text = time;
+        _algorithmResults[2].text = algTime;
+        _algorithmResults[3].text = excTime;
+
+        _algorithmResultsCopy[0].text = algTimeMs != -1 ? algTimeMs.ToString("0") : "...";
+        _algorithmResultsCopy[1].text = excTimeMs != -1 ? excTimeMs.ToString("0") : "...";
     }
 
     public void SelectQuaxPos(int index)
@@ -117,7 +125,7 @@ public class OptionsManager : MonoBehaviour
 
         _quaxPosOverlayTexture.ClearTexture(markQuax);
 
-        UpdateAlgorithmResults("-", "-", "-");
+        UpdateAlgorithmResults("-", "-", "-", "-", -1, -1);
     }
 
     public void StartAlgorithm()
@@ -125,7 +133,7 @@ public class OptionsManager : MonoBehaviour
         if (StartedAlgorithm != null)
         {
             StartedAlgorithm.Invoke(_selectedQuax, MapDataManager.Instance.CityPosition);
-            UpdateAlgorithmResults("...", "...", "...");
+            UpdateAlgorithmResults("...", "...", "...", "...", -1, -1);
         }
     }
 

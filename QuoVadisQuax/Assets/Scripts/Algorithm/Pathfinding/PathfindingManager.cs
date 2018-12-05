@@ -122,17 +122,17 @@ namespace Algorithm.Pathfinding
         /// <summary>
         ///     The total execution time spent while updating the <see cref="PathfindingGrid" />
         /// </summary>
-        public double TotalTimeUpdateGrid;
+        public long TotalTimeUpdateGrid;
 
         /// <summary>
         ///     The total execution time spent pathfinding with unknown nodes as unwalkable
         /// </summary>
-        public double TotalTimePathfinding01;
+        public long TotalTimePathfinding01;
 
         /// <summary>
         ///     The total execution time spent pathfinding with unknown nodes as walkable
         /// </summary>
-        public double TotalTimePathfinding02;
+        public long TotalTimePathfinding02;
 
         #endregion
 
@@ -174,7 +174,7 @@ namespace Algorithm.Pathfinding
 
                     s.Stop();
                     //Debug.Log("Updating Grid took: " + s.Elapsed.TotalMilliseconds + "ms");
-                    TotalTimeUpdateGrid += s.Elapsed.TotalMilliseconds;
+                    TotalTimeUpdateGrid += s.ElapsedMilliseconds;
                 });
             };
 
@@ -219,6 +219,7 @@ namespace Algorithm.Pathfinding
         {
             bool isWalkable;
 
+            // TODO: Only one square needs to be of type Ground
             if (updatedSquares.TrueForAll(s => s.MapType == MapTypes.Ground))
             {
                 isWalkable = true;
@@ -291,7 +292,7 @@ namespace Algorithm.Pathfinding
 
                     s.Stop();
                     //Debug.Log("Pathfinding 01 took: " + s.Elapsed.TotalMilliseconds + "ms");
-                    TotalTimePathfinding01 += s.Elapsed.TotalMilliseconds;
+                    TotalTimePathfinding01 += s.ElapsedMilliseconds;
                 });
             }
 
@@ -318,7 +319,7 @@ namespace Algorithm.Pathfinding
 
                     s.Stop();
                     //Debug.Log("Pathfinding 02 took: " + s.Elapsed.TotalMilliseconds + "ms");
-                    TotalTimePathfinding02 += s.Elapsed.TotalMilliseconds;
+                    TotalTimePathfinding02 += s.ElapsedMilliseconds;
                 });
             }
         }

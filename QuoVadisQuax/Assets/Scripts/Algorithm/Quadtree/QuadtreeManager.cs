@@ -61,7 +61,12 @@ namespace Algorithm.Quadtree
         /// <summary>
         ///     The total execution time spent on searching in quadtree
         /// </summary>
-        public double QuadtreeTime;
+        public long QuadtreeTime;
+
+        /// <summary>
+        ///     The total execution time spent on searches outside of the quadtree`s bounds
+        /// </summary>
+        public long SpecialSearchTime;
 
         #endregion
 
@@ -99,6 +104,7 @@ namespace Algorithm.Quadtree
             RootNode = null;
             RootNode = new Node(new Vector2Int(0, 0), MapDataManager.Instance.Dimensions.X);
             QuadtreeTime = 0;
+            SpecialSearchTime = 0;
         }
 
         /// <summary>
@@ -136,8 +142,8 @@ namespace Algorithm.Quadtree
                 }
 
                 s.Stop();
-                //Debug.Log("Quadtree Search took: " + s.Elapsed.TotalMilliseconds + "ms");
-                QuadtreeTime += s.Elapsed.TotalMilliseconds;
+                //UnityEngine.Debug.Log("Quadtree Search took: " + s.ElapsedMilliseconds + "ms");
+                QuadtreeTime += s.ElapsedMilliseconds;
 
                 if (UpdatedQuadtree != null)
                     UpdatedQuadtree.Invoke(updatedSquares, sw_point);
@@ -153,6 +159,9 @@ namespace Algorithm.Quadtree
             // Execute from main thread
             ThreadQueuer.Instance.QueueMainThreadAction(() =>
             {
+                var s = new Stopwatch();
+                s.Start();
+
                 var isWalkable = true;
 
                 var containsWater = false;
@@ -194,6 +203,10 @@ namespace Algorithm.Quadtree
                 }
 
                 RegisterNewNode(specialSquare);
+
+                s.Stop();
+                //UnityEngine.Debug.Log("Special Search took: " + s.ElapsedMilliseconds + "ms");
+                SpecialSearchTime += s.ElapsedMilliseconds;
 
                 if (CheckedSpecialSquare != null)
                     CheckedSpecialSquare.Invoke(isWalkable, sw_point);

@@ -48,7 +48,9 @@ public class ThreadQueuer : MonoBehaviour
                 clearList = false;
             }
 
-            foreach (var a in mainThreadActions) a();
+            foreach (var a in mainThreadActions)
+                if (a != null)
+                    a();
 
             if (clearList) _mainThreadActionsMultiple.Clear();
             else _mainThreadActionsMultiple.RemoveRange(0, MainThreadActionsMultipleMaxSize);
@@ -59,7 +61,7 @@ public class ThreadQueuer : MonoBehaviour
             var a = _mainThreadActions[0];
             _mainThreadActions.RemoveAt(0);
 
-            a();
+            if (a != null) a();
         }
     }
 
