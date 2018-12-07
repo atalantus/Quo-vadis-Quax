@@ -139,10 +139,22 @@ namespace Algorithm.Quadtree
                     var square = RootNode.FindPoint(point);
 
                     updatedSquares.Add(square);
+
+                    if (square.MapType == MapTypes.Ground)
+                        goto Finish;
                 }
 
+                Finish:
+
                 s.Stop();
-                //UnityEngine.Debug.Log("Quadtree Search took: " + s.ElapsedMilliseconds + "ms");
+                /*
+                Debug.Log("Quadtree Search took: " + s.ElapsedMilliseconds + "ms | " +
+                          "Time offset to last algorithm step: " +
+                          (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                           AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
+                    AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
+                    */
                 QuadtreeTime += s.ElapsedMilliseconds;
 
                 if (UpdatedQuadtree != null)
@@ -205,7 +217,14 @@ namespace Algorithm.Quadtree
                 RegisterNewNode(specialSquare);
 
                 s.Stop();
-                //UnityEngine.Debug.Log("Special Search took: " + s.ElapsedMilliseconds + "ms");
+                /*
+                Debug.Log("Special Search took: " + s.ElapsedMilliseconds + "ms | " +
+                          "Time offset to last algorithm step: " +
+                          (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                           AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
+                    AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
+                    */
                 SpecialSearchTime += s.ElapsedMilliseconds;
 
                 if (CheckedSpecialSquare != null)

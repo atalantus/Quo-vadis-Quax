@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Algorithm.Quadtree;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -173,7 +174,14 @@ namespace Algorithm.Pathfinding
                     }
 
                     s.Stop();
-                    //Debug.Log("Updating Grid took: " + s.Elapsed.TotalMilliseconds + "ms");
+                    /*
+                    Debug.Log("Updating Grid took: " + s.Elapsed.TotalMilliseconds + "ms | " +
+                              "Time offset to last algorithm step: " +
+                              (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                               AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                    AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
+                        AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
+                        */
                     TotalTimeUpdateGrid += s.ElapsedMilliseconds;
                 });
             };
@@ -219,8 +227,7 @@ namespace Algorithm.Pathfinding
         {
             bool isWalkable;
 
-            // TODO: Only one square needs to be of type Ground
-            if (updatedSquares.TrueForAll(s => s.MapType == MapTypes.Ground))
+            if (updatedSquares.Any(s => s.MapType == MapTypes.Ground))
             {
                 isWalkable = true;
             }
@@ -291,7 +298,14 @@ namespace Algorithm.Pathfinding
                     }
 
                     s.Stop();
-                    //Debug.Log("Pathfinding 01 took: " + s.Elapsed.TotalMilliseconds + "ms");
+                    /*
+                    Debug.Log("Pathfinding 01 took: " + s.Elapsed.TotalMilliseconds + "ms | " +
+                              "Time offset to last algorithm step: " +
+                              (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                               AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                    AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
+                        AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
+                        */
                     TotalTimePathfinding01 += s.ElapsedMilliseconds;
                 });
             }
@@ -318,7 +332,14 @@ namespace Algorithm.Pathfinding
                     }
 
                     s.Stop();
-                    //Debug.Log("Pathfinding 02 took: " + s.Elapsed.TotalMilliseconds + "ms");
+                    /*
+                    Debug.Log("Pathfinding 02 took: " + s.Elapsed.TotalMilliseconds + "ms | " +
+                              "Time offset to last algorithm step: " +
+                              (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                               AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                    AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
+                        AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
+                        */
                     TotalTimePathfinding02 += s.ElapsedMilliseconds;
                 });
             }

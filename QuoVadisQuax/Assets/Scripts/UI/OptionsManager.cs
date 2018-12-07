@@ -52,6 +52,7 @@ public class OptionsManager : MonoBehaviour
     private void Awake()
     {
         _closedPos = transform.position;
+        ShowNodes = true;
     }
 
     private void Start()

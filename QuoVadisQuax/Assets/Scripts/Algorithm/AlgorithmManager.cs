@@ -16,6 +16,11 @@ namespace Algorithm
         #region Properties
 
         /// <summary>
+        ///     The Singleton Instance
+        /// </summary>
+        public static AlgorithmManager Instance { get; private set; }
+
+        /// <summary>
         ///     Finished algorithm delegate
         /// </summary>
         /// <param name="foundPath">Was a path found or not</param>
@@ -63,20 +68,33 @@ namespace Algorithm
         /// <summary>
         ///     General algorithm Stopwatch
         /// </summary>
-        private Stopwatch _stopwatch;
+        public Stopwatch Stopwatch { get; private set; }
 
         #endregion
 
         #region Methods
 
         /// <summary>
-        ///     Unity Start Method
+        ///     Unity Awake
+        /// </summary>
+        private void Awake()
+        {
+            if (Instance == null)
+                Instance = this;
+            else if (Instance != this)
+                Destroy(gameObject);
+        }
+
+        /// <summary>
+        ///     Unity Start
         /// </summary>
         private void Start()
         {
+            // Make sure to run as fast as possible
+            QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 300;
 
-            _stopwatch = new Stopwatch();
+            Stopwatch = new Stopwatch();
 
             /**
              * Subscribe to events
@@ -90,12 +108,12 @@ namespace Algorithm
             {
                 _containerManager.DestroyMessage(PREPARING_ALGORITHM_MSG_ID);
                 _containerManager.CreateMessage("Finding Path", SEARCHING_PATH_MSG_ID, true);
-                _stopwatch.Start();
+                Stopwatch.Start();
             };
 
             PathfindingManager.Instance.FinishedPathfinding += (a, foundPath) =>
             {
-                _stopwatch.Stop();
+                Stopwatch.Stop();
                 _foundPath = foundPath;
             };
 
@@ -111,7 +129,7 @@ namespace Algorithm
         {
             _foundPath = false;
             _quadcopterFlights = 0;
-            _stopwatch.Reset();
+            Stopwatch.Reset();
 
             // Setup Quadtree and Pathfinding
             QuadtreeManager.Instance.SetupQuadtree();
@@ -145,10 +163,10 @@ namespace Algorithm
             Debug.Log("Pathfinding 02: " + PathfindingManager.Instance.TotalTimePathfinding02 + " ms");
             Debug.Log("-------------------------");
             Debug.Log("WHOLE ALGORITHM: " + time + " ms");
-            Debug.Log("WHOLE PROGRAM: " + _stopwatch.ElapsedMilliseconds + " ms");
+            Debug.Log("WHOLE PROGRAM: " + Stopwatch.ElapsedMilliseconds + " ms");
 
             if (FinishedAlgorithm != null)
-                FinishedAlgorithm.Invoke(_foundPath, _quadcopterFlights, ts, _stopwatch.Elapsed);
+                FinishedAlgorithm.Invoke(_foundPath, _quadcopterFlights, ts, Stopwatch.Elapsed);
         }
 
         #endregion
