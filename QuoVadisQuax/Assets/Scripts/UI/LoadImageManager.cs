@@ -3,8 +3,8 @@ using System.IO;
 using Algorithm.Pathfinding;
 using Algorithm.Quadtree;
 using Crosstales.FB;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using Grid = Algorithm.Pathfinding.Grid;
 
 #if UNITY_STANDALONE_WIN && !UNITY_EDITOR
@@ -42,15 +42,9 @@ public class LoadImageManager : MonoBehaviour
     /// </summary>
     private bool IsOpen { get; set; }
 
-    /// <summary>
-    ///     The world position when the LoadImage GUI is open
-    /// </summary>
-    private Vector3 _openPos;
-
     [SerializeField] private PathfindingManager _pathfindingManager;
-    [SerializeField] private Text _imageDimensionsText;
-    [SerializeField] private Text _filePathText;
-    [SerializeField] private GameObject _toggleIcon;
+    [SerializeField] private TextMeshProUGUI _imageDimensionsText;
+    [SerializeField] private TextMeshProUGUI _filePathText;
 
     /// <summary>
     ///     The map texture
@@ -69,7 +63,6 @@ public class LoadImageManager : MonoBehaviour
     private void Awake()
     {
         IsOpen = true;
-        _openPos = transform.position;
 #if UNITY_STANDALONE_WIN && !UNITY_EDITOR
         _hWndUnity = (IntPtr)GetActiveWindow();
 #endif
@@ -123,19 +116,6 @@ public class LoadImageManager : MonoBehaviour
 #else
         Debug.LogWarning("File Browser NOT installed!");
 #endif
-    }
-
-    /// <summary>
-    ///     Toggles the LoadImage GUI
-    /// </summary>
-    public void ToggleGUI()
-    {
-        var offset = 0;
-        if (IsOpen) offset = 50;
-        var target = new Vector3(_openPos.x, _openPos.y + offset, _openPos.z);
-        iTween.MoveTo(gameObject, target, .5f);
-        iTween.RotateBy(_toggleIcon, new Vector3(0, 0, .5f), .5f);
-        IsOpen = !IsOpen;
     }
 
     /// <summary>
