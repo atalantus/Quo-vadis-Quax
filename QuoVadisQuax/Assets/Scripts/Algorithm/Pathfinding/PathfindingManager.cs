@@ -174,14 +174,14 @@ namespace Algorithm.Pathfinding
                     }
 
                     s.Stop();
-                    /*
+
                     Debug.Log("Updating Grid took: " + s.Elapsed.TotalMilliseconds + "ms | " +
                               "Time offset to last algorithm step: " +
                               (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
                                AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
                     AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                         AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
-                        */
+
                     TotalTimeUpdateGrid += s.ElapsedMilliseconds;
                 });
             };
@@ -298,14 +298,14 @@ namespace Algorithm.Pathfinding
                     }
 
                     s.Stop();
-                    /*
+
                     Debug.Log("Pathfinding 01 took: " + s.Elapsed.TotalMilliseconds + "ms | " +
                               "Time offset to last algorithm step: " +
                               (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
                                AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
                     AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                         AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
-                        */
+
                     TotalTimePathfinding01 += s.ElapsedMilliseconds;
                 });
             }
@@ -332,14 +332,14 @@ namespace Algorithm.Pathfinding
                     }
 
                     s.Stop();
-                    /*
+
                     Debug.Log("Pathfinding 02 took: " + s.Elapsed.TotalMilliseconds + "ms | " +
                               "Time offset to last algorithm step: " +
                               (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
                                AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
                     AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                         AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
-                        */
+
                     TotalTimePathfinding02 += s.ElapsedMilliseconds;
                 });
             }

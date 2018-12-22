@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Algorithm.Pathfinding;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Algorithm.Quadtree
 {
@@ -147,14 +148,14 @@ namespace Algorithm.Quadtree
                 Finish:
 
                 s.Stop();
-                /*
+
                 Debug.Log("Quadtree Search took: " + s.ElapsedMilliseconds + "ms | " +
                           "Time offset to last algorithm step: " +
                           (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
                            AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
                 AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                     AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
-                    */
+
                 QuadtreeTime += s.ElapsedMilliseconds;
 
                 if (UpdatedQuadtree != null)
@@ -217,14 +218,14 @@ namespace Algorithm.Quadtree
                 RegisterNewNode(specialSquare);
 
                 s.Stop();
-                /*
+
                 Debug.Log("Special Search took: " + s.ElapsedMilliseconds + "ms | " +
                           "Time offset to last algorithm step: " +
                           (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
                            AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
                 AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                     AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
-                    */
+
                 SpecialSearchTime += s.ElapsedMilliseconds;
 
                 if (CheckedSpecialSquare != null)
