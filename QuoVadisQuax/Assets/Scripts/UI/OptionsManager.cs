@@ -1,5 +1,7 @@
 ﻿using System;
 using Algorithm;
+using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 #if UNITY_EDITOR
@@ -19,15 +21,10 @@ public class OptionsManager : MonoBehaviour
     public event StartedAlgorithmEventHandler StartedAlgorithm;
 
     [SerializeField] private AlgorithmManager _algorithmManager;
-    [SerializeField] private Text[] _algorithmResults;
+    [SerializeField] private TextMeshProUGUI[] _algorithmResults;
     [SerializeField] private InputField[] _algorithmResultsCopy;
 
-    /// <summary>
-    ///     The world position of the option panel when closed
-    /// </summary>
-    private Vector3 _closedPos;
-
-    [SerializeField] private Text[] _guiCoordinates;
+    [SerializeField] private TextMeshProUGUI[] _guiCoordinates;
     [SerializeField] private LoadImageManager _loadImage;
     [SerializeField] private Dropdown _quaxPosDropdown;
     [SerializeField] private GameObject _quaxPosMap;
@@ -51,7 +48,7 @@ public class OptionsManager : MonoBehaviour
 
     private void Awake()
     {
-        _closedPos = transform.position;
+        ShowNodes = true;
     }
 
     private void Start()
@@ -64,6 +61,8 @@ public class OptionsManager : MonoBehaviour
                 excTime.Minutes + "m " + excTime.Seconds + "s " + excTime.Milliseconds + "ms",
                 algTime.TotalMilliseconds, excTime.TotalMilliseconds);
         };
+
+        DOTween.Init();
     }
 
     private void OnLoadingState_Changed(LoadImageManager.LoadingState state)
@@ -121,6 +120,10 @@ public class OptionsManager : MonoBehaviour
             if (size % 2 == 0) size++;
             _quaxPosOverlayTexture.DrawSquare(new Vector2Int(_selectedQuax.X - size / 2, _selectedQuax.Y - size / 2),
                 size, Color.magenta);
+            _quaxPosOverlayTexture.DrawSquare(
+                new Vector2Int(MapDataManager.Instance.CityPosition.X - size / 2,
+                    MapDataManager.Instance.CityPosition.Y - size / 2),
+                size, Color.green);
         };
 
         _quaxPosOverlayTexture.ClearTexture(markQuax);
@@ -142,11 +145,11 @@ public class OptionsManager : MonoBehaviour
     /// </summary>
     public void ToggleGUI()
     {
-        var offset = 0;
-        if (!IsOpen) offset = 400;
-        var target = new Vector3(_closedPos.x + offset, _closedPos.y, _closedPos.z);
-        iTween.MoveTo(gameObject, target, .5f);
-        iTween.RotateBy(_toggleIcon, new Vector3(0, 0, .5f), .5f);
+        var offset = IsOpen ? -200 : 0;
+        GetComponent<RectTransform>().DOAnchorPosX(offset, .3f, true);
+        var rotOffset = IsOpen ? -180 : 180;
+        _toggleIcon.transform.DORotate(new Vector3(0f, 0f, _toggleIcon.transform.rotation.eulerAngles.z + rotOffset),
+            .3f);
         IsOpen = !IsOpen;
     }
 

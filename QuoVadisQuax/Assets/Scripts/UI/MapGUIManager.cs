@@ -35,6 +35,7 @@ public class MapGUIManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     [SerializeField] private RectTransform _mapContainer;
 
     [SerializeField] private RawImage _mapRawImage;
+    [SerializeField] private Slider _slider;
     private float _maxZoomLevel;
     private float _minZoomLevel;
     [SerializeField] private OptionsManager _optionsManager;
@@ -174,6 +175,7 @@ public class MapGUIManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         /**
          * Check for scroll wheel input
          */
+        /*
         var scrollDelta = Input.GetAxis("Mouse ScrollWheel");
 
         if (scrollDelta != 0f)
@@ -181,7 +183,9 @@ public class MapGUIManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             if (!_hasFocus) return;
 
             scrollDelta = Mathf.Clamp(scrollDelta, -0.15f, 0.15f);
-            var zoomDelta = Mathf.Abs(scrollDelta * 650 * Time.deltaTime);
+            var zoomDelta = Mathf.Abs(scrollDelta * Time.deltaTime);
+            
+            Debug.Log(scrollDelta);
 
             if (scrollDelta > 0f)
             {
@@ -203,7 +207,11 @@ public class MapGUIManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 if (_mapContainer.transform.localScale.x < _minZoomLevel)
                     _mapContainer.transform.localScale = new Vector3(_minZoomLevel, _minZoomLevel, _minZoomLevel);
             }
+
+            _slider.value = _mapContainer.transform.localScale.x;
         }
+        
+        */
     }
 
     /// <summary>
@@ -226,6 +234,45 @@ public class MapGUIManager : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         _maxZoomLevel = z * x * 0.15f;
         // Calculate the minimum zoom level
         _minZoomLevel = z / 3;
+
+        _slider.minValue = _minZoomLevel;
+        _slider.maxValue = _maxZoomLevel;
+        _slider.value = _defaultZoomLevel;
+    }
+
+    /// <summary>
+    ///     Zooms the map
+    /// </summary>
+    /// <param name="level">The level of the zoom. Positive = zoom in. Negative = zoom out.</param>
+    public void Zoom(int level)
+    {
+        var levelOffset = (_maxZoomLevel - _minZoomLevel) / 10f;
+
+        if (level > 0)
+        {
+            var curOffset = _minZoomLevel;
+
+            while (_mapContainer.transform.localScale.x >= curOffset && curOffset <= _maxZoomLevel)
+                curOffset += levelOffset;
+
+            _mapContainer.transform.localScale = new Vector3(curOffset, curOffset, curOffset);
+        }
+        else
+        {
+            var curOffset = _maxZoomLevel;
+
+            while (_mapContainer.transform.localScale.x <= curOffset && curOffset >= _minZoomLevel)
+                curOffset -= levelOffset;
+
+            _mapContainer.transform.localScale = new Vector3(curOffset, curOffset, curOffset);
+        }
+
+        _slider.value = _mapContainer.transform.localScale.x;
+    }
+
+    public void ApplyZoom(float value)
+    {
+        _mapContainer.transform.localScale = new Vector3(value, value, value);
     }
 
     #endregion
