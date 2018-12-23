@@ -101,11 +101,6 @@ namespace Algorithm.Pathfinding
         private bool _updatedGrid;
 
         /// <summary>
-        ///     Is pathfinding with unknown nodes as walkable
-        /// </summary>
-        private bool _tryPathfinding02;
-
-        /// <summary>
         ///     Cached open set
         /// </summary>
         private Heap<Node> _cachedOpenSet;
@@ -120,20 +115,19 @@ namespace Algorithm.Pathfinding
         /// </summary>
         private Node _cachedLastPathNode;
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
         /// <summary>
         ///     The total execution time spent while updating the <see cref="PathfindingGrid" />
         /// </summary>
         public long TotalTimeUpdateGrid;
 
         /// <summary>
-        ///     The total execution time spent pathfinding with unknown nodes as unwalkable
-        /// </summary>
-        public long TotalTimePathfinding01;
-
-        /// <summary>
         ///     The total execution time spent pathfinding with unknown nodes as walkable
         /// </summary>
-        public long TotalTimePathfinding02;
+        public long TotalTimePathfinding;
+
+#endif
 
         #endregion
 
@@ -162,8 +156,17 @@ namespace Algorithm.Pathfinding
             {
                 ThreadQueuer.Instance.StartThreadedAction(() =>
                 {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
                     var s = new Stopwatch();
                     s.Start();
+
+                    var tOffset = AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                                  AlgorithmAnalyzer.Instance.LastAlgorithmStepTime;
+                    AlgorithmAnalyzer.Instance.UpdateGridOffsetTime += tOffset;
+
+#endif
+
                     try
                     {
                         UpdateGrid(square, sw_point, ref _updatedGrid);
@@ -173,16 +176,19 @@ namespace Algorithm.Pathfinding
                         Debug.LogError(e);
                     }
 
-                    s.Stop();
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
 
                     Debug.Log("Updating Grid took: " + s.Elapsed.TotalMilliseconds + "ms | " +
                               "Time offset to last algorithm step: " +
-                              (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
-                               AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                              tOffset + " ms");
                     AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                         AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
 
+                    s.Stop();
+
                     TotalTimeUpdateGrid += s.ElapsedMilliseconds;
+
+#endif
                 });
             };
 
@@ -209,9 +215,12 @@ namespace Algorithm.Pathfinding
             _cachedClosedSet = new HashSet<Node>();
             _cachedLastPathNode = null;
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
             TotalTimeUpdateGrid = 0;
-            TotalTimePathfinding01 = 0;
-            TotalTimePathfinding02 = 0;
+            TotalTimePathfinding = 0;
+
+#endif
 
             // Start creating the pathfinding grid
             ThreadQueuer.Instance.StartThreadedAction(() => { PathfindingGrid.SetupGrid(ref _createdGrid); });
@@ -274,6 +283,13 @@ namespace Algorithm.Pathfinding
 
                 // Start the initial pathfinding
                 _updatedGrid = true;
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
+                AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
+                    AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
+
+#endif
             }
 
             /**
@@ -285,62 +301,39 @@ namespace Algorithm.Pathfinding
 
                 ThreadQueuer.Instance.StartThreadedAction(() =>
                 {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
                     var s = new Stopwatch();
                     s.Start();
 
+                    var tOffset = AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                                  AlgorithmAnalyzer.Instance.LastAlgorithmStepTime;
+                    AlgorithmAnalyzer.Instance.PathfindingOffsetTime += tOffset;
+
+#endif
+
                     try
                     {
-                        FindPath(false);
+                        FindPath();
                     }
                     catch (Exception e)
                     {
                         Debug.LogError(e);
                     }
 
-                    s.Stop();
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
 
-                    Debug.Log("Pathfinding 01 took: " + s.Elapsed.TotalMilliseconds + "ms | " +
+                    Debug.Log("Pathfinding took: " + s.Elapsed.TotalMilliseconds + "ms | " +
                               "Time offset to last algorithm step: " +
-                              (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
-                               AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                              tOffset + " ms");
                     AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                         AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
 
-                    TotalTimePathfinding01 += s.ElapsedMilliseconds;
-                });
-            }
-
-            /**
-             * Execute pathfinding with unknown nodes as walkable
-             */
-            if (_tryPathfinding02)
-            {
-                _tryPathfinding02 = false;
-
-                ThreadQueuer.Instance.StartThreadedAction(() =>
-                {
-                    var s = new Stopwatch();
-                    s.Start();
-
-                    try
-                    {
-                        FindPath(true);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogError(e);
-                    }
-
                     s.Stop();
 
-                    Debug.Log("Pathfinding 02 took: " + s.Elapsed.TotalMilliseconds + "ms | " +
-                              "Time offset to last algorithm step: " +
-                              (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
-                               AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
-                    AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
-                        AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
+                    TotalTimePathfinding += s.ElapsedMilliseconds;
 
-                    TotalTimePathfinding02 += s.ElapsedMilliseconds;
+#endif
                 });
             }
         }
@@ -348,27 +341,13 @@ namespace Algorithm.Pathfinding
         /// <summary>
         ///     Try find a path to the <see cref="_targetNode" />
         /// </summary>
-        /// <param name="canWalkUnknown">Are unknown nodes considered walkable</param>
-        public void FindPath(bool canWalkUnknown)
+        public void FindPath()
         {
-            Heap<Node> openSet;
-            HashSet<Node> closedSet;
-
-            if (!canWalkUnknown)
-            {
-                // Use cached sets
-                openSet = _cachedOpenSet;
-                closedSet = _cachedClosedSet;
-                openSet.Add(_cachedLastPathNode);
-            }
-            else
-            {
-                // Start from the zero
-                openSet =
-                    new Heap<Node>(PathfindingGrid.NodeGrid.GetLength(0) * PathfindingGrid.NodeGrid.GetLength(1));
-                closedSet = new HashSet<Node>();
-                openSet.Add(_startNode);
-            }
+            // Start from the zero
+            var openSet =
+                new Heap<Node>(PathfindingGrid.NodeGrid.GetLength(0) * PathfindingGrid.NodeGrid.GetLength(1));
+            var closedSet = new HashSet<Node>();
+            openSet.Add(_startNode);
 
             while (openSet.Count > 0)
             {
@@ -381,31 +360,27 @@ namespace Algorithm.Pathfinding
                     // Found a path to the target
                     var path = RetracePath(_startNode, _targetNode);
 
-                    if (canWalkUnknown)
-                    {
-                        // Get the first unknown node in the path
-                        for (var i = 0; i < path.Count; i++)
-                            if (path[i].NodeType == NodeTypes.Unknown)
-                            {
-                                // cache the last node on the path that is walkable
-                                _cachedLastPathNode = i - 1 < 0 ? _startNode : path[i - 1];
 
-                                // Request map information about the first unknown node on the path
-                                if (RequestedMapTile != null)
-                                    RequestedMapTile.Invoke(path[i].Position);
-                                break;
-                            }
-                    }
-                    else
-                    {
-                        // Found a valid path from the start to the city
+                    // Get the first unknown node in the path
+                    for (var i = 0; i < path.Count; i++)
+                        if (path[i].NodeType == NodeTypes.Unknown)
+                        {
+                            // cache the last node on the path that is walkable
+                            _cachedLastPathNode = i - 1 < 0 ? _startNode : path[i - 1];
 
-                        /**
-                         * DONE
-                         */
-                        if (FinishedPathfinding != null)
-                            FinishedPathfinding.Invoke(path, true);
-                    }
+                            // Request map information about the first unknown node on the path
+                            if (RequestedMapTile != null)
+                                RequestedMapTile.Invoke(path[i].Position);
+                            return;
+                        }
+
+                    // Found a valid path from the start to the city
+
+                    /**
+                     * DONE
+                     */
+                    if (FinishedPathfinding != null)
+                        FinishedPathfinding.Invoke(path, true);
 
                     return;
                 }
@@ -416,7 +391,7 @@ namespace Algorithm.Pathfinding
                 foreach (var neighbour in PathfindingGrid.GetNeighbours(currentNode))
                 {
                     // Is the neighbour important
-                    if (!neighbour.IsWalkable(canWalkUnknown) || closedSet.Contains(neighbour)) continue;
+                    if (!neighbour.IsWalkable() || closedSet.Contains(neighbour)) continue;
 
                     // Calculate neighbours G-Cost
                     var newMovementCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour);
@@ -436,18 +411,9 @@ namespace Algorithm.Pathfinding
                 }
             }
 
-            // Unable to find a path
-            if (canWalkUnknown)
-            {
-                // There is no path
-                if (FinishedPathfinding != null)
-                    FinishedPathfinding.Invoke(null, false);
-            }
-            else
-            {
-                // Try again with unknown nodes as walkable
-                _tryPathfinding02 = true;
-            }
+            // There is no path
+            if (FinishedPathfinding != null)
+                FinishedPathfinding.Invoke(null, false);
         }
 
         /// <summary>

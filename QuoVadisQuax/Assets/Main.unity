@@ -4862,8 +4862,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TotalTimeUpdateGrid: 0
-  TotalTimePathfinding01: 0
-  TotalTimePathfinding02: 0
+  TotalTimePathfinding: 0
 --- !u!114 &1086849737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4901,6 +4900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6bb70aaf79b32343ab44a2babe79abe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  optionsManager: {fileID: 1521842672}
 --- !u!1 &1089497169
 GameObject:
   m_ObjectHideFlags: 0

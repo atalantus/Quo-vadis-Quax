@@ -141,17 +141,35 @@ namespace Algorithm
         /// </summary>
         public void FinishAlgorithm()
         {
+            TimeSpan ts;
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
             // Get pure algorithm time
             var time = QuadtreeManager.Instance.QuadtreeTime +
                        QuadtreeManager.Instance.SpecialSearchTime +
                        PathfindingManager.Instance.TotalTimeUpdateGrid +
-                       PathfindingManager.Instance.TotalTimePathfinding01 +
-                       PathfindingManager.Instance.TotalTimePathfinding02;
+                       PathfindingManager.Instance.TotalTimePathfinding;
 
-            var ts = TimeSpan.FromMilliseconds(time);
+            ts = TimeSpan.FromMilliseconds(time);
+
+#else
+            ts = Stopwatch.Elapsed;
+
+#endif
 
             _containerManager.DestroyMessage(SEARCHING_PATH_MSG_ID);
             _containerManager.CreateMessage(ts.Seconds + "s " + ts.Milliseconds + "ms", "algorithm_time", false, 5f);
+
+            if (FinishedAlgorithm != null)
+                FinishedAlgorithm.Invoke(_foundPath, _quadcopterFlights, ts, Stopwatch.Elapsed);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
+            var totalOffset = AlgorithmAnalyzer.Instance.QuadtreeOffsetTime +
+                              AlgorithmAnalyzer.Instance.SpecialSearchOffsetTime +
+                              AlgorithmAnalyzer.Instance.UpdateGridOffsetTime +
+                              AlgorithmAnalyzer.Instance.PathfindingOffsetTime;
 
             Debug.Log("===========================");
             Debug.Log("----- ALGORITHM TIMES -----");
@@ -159,14 +177,18 @@ namespace Algorithm
             Debug.Log("Quadtree Searches: " + QuadtreeManager.Instance.QuadtreeTime + " ms");
             Debug.Log("Special Searches: " + QuadtreeManager.Instance.SpecialSearchTime + " ms");
             Debug.Log("Updating A* Grid: " + PathfindingManager.Instance.TotalTimeUpdateGrid + " ms");
-            Debug.Log("Pathfinding 01: " + PathfindingManager.Instance.TotalTimePathfinding01 + " ms");
-            Debug.Log("Pathfinding 02: " + PathfindingManager.Instance.TotalTimePathfinding02 + " ms");
+            Debug.Log("Pathfinding: " + PathfindingManager.Instance.TotalTimePathfinding + " ms");
             Debug.Log("-------------------------");
             Debug.Log("WHOLE ALGORITHM: " + time + " ms");
             Debug.Log("WHOLE PROGRAM: " + Stopwatch.ElapsedMilliseconds + " ms");
+            Debug.Log("-------------------------");
+            Debug.Log("Quadtree Offset: " + AlgorithmAnalyzer.Instance.QuadtreeOffsetTime + " ms");
+            Debug.Log("Special Searches Offset: " + AlgorithmAnalyzer.Instance.SpecialSearchOffsetTime + " ms");
+            Debug.Log("Updating A* Grid Offset: " + AlgorithmAnalyzer.Instance.UpdateGridOffsetTime + " ms");
+            Debug.Log("Pathfinding Offset: " + AlgorithmAnalyzer.Instance.PathfindingOffsetTime + " ms");
+            Debug.Log("TOTAL OFFSET: " + totalOffset + " ms");
 
-            if (FinishedAlgorithm != null)
-                FinishedAlgorithm.Invoke(_foundPath, _quadcopterFlights, ts, Stopwatch.Elapsed);
+#endif
         }
 
         #endregion

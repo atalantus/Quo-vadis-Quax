@@ -61,13 +61,12 @@ namespace Algorithm.Pathfinding
         }
 
         /// <summary>
-        ///     Check if the node is walkable
+        ///     Check if the node is walkable. (Unknown nodes are also walkable)
         /// </summary>
-        /// <param name="canWalkUnknown">Are unknown nodes considered walkable</param>
         /// <returns>True if the node is walkable</returns>
-        public bool IsWalkable(bool canWalkUnknown)
+        public bool IsWalkable()
         {
-            return NodeType == NodeTypes.Walkable || NodeType == NodeTypes.Unknown && canWalkUnknown;
+            return NodeType == NodeTypes.Walkable || NodeType == NodeTypes.Unknown;
         }
 
         /// <inheritdoc />

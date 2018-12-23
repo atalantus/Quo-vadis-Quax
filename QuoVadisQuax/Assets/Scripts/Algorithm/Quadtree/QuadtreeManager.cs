@@ -59,6 +59,8 @@ namespace Algorithm.Quadtree
         /// </summary>
         public Node RootNode;
 
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
         /// <summary>
         ///     The total execution time spent on searching in quadtree
         /// </summary>
@@ -68,6 +70,8 @@ namespace Algorithm.Quadtree
         ///     The total execution time spent on searches outside of the quadtree`s bounds
         /// </summary>
         public long SpecialSearchTime;
+
+#endif
 
         #endregion
 
@@ -104,8 +108,13 @@ namespace Algorithm.Quadtree
         {
             RootNode = null;
             RootNode = new Node(new Vector2Int(0, 0), MapDataManager.Instance.Dimensions.X);
+
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
             QuadtreeTime = 0;
             SpecialSearchTime = 0;
+
+#endif
         }
 
         /// <summary>
@@ -117,8 +126,16 @@ namespace Algorithm.Quadtree
             // Execute from main thread
             ThreadQueuer.Instance.QueueMainThreadAction(() =>
             {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
                 var s = new Stopwatch();
                 s.Start();
+
+                var tOffset = AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                              AlgorithmAnalyzer.Instance.LastAlgorithmStepTime;
+                AlgorithmAnalyzer.Instance.QuadtreeOffsetTime += tOffset;
+
+#endif
 
                 var updatedSquares = new List<MapSquare>();
 
@@ -147,16 +164,18 @@ namespace Algorithm.Quadtree
 
                 Finish:
 
-                s.Stop();
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
 
                 Debug.Log("Quadtree Search took: " + s.ElapsedMilliseconds + "ms | " +
-                          "Time offset to last algorithm step: " +
-                          (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
-                           AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                          "Time offset to last algorithm step: " + tOffset + " ms");
                 AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                     AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
 
+                s.Stop();
+
                 QuadtreeTime += s.ElapsedMilliseconds;
+
+#endif
 
                 if (UpdatedQuadtree != null)
                     UpdatedQuadtree.Invoke(updatedSquares, sw_point);
@@ -172,8 +191,16 @@ namespace Algorithm.Quadtree
             // Execute from main thread
             ThreadQueuer.Instance.QueueMainThreadAction(() =>
             {
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
+
                 var s = new Stopwatch();
                 s.Start();
+
+                var tOffset = AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
+                              AlgorithmAnalyzer.Instance.LastAlgorithmStepTime;
+                AlgorithmAnalyzer.Instance.SpecialSearchOffsetTime += tOffset;
+
+#endif
 
                 var isWalkable = true;
 
@@ -217,16 +244,18 @@ namespace Algorithm.Quadtree
 
                 RegisterNewNode(specialSquare);
 
-                s.Stop();
+#if DEVELOPMENT_BUILD || UNITY_EDITOR
 
                 Debug.Log("Special Search took: " + s.ElapsedMilliseconds + "ms | " +
-                          "Time offset to last algorithm step: " +
-                          (AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds -
-                           AlgorithmAnalyzer.Instance.LastAlgorithmStepTime) + " ms");
+                          "Time offset to last algorithm step: " + tOffset + " ms");
                 AlgorithmAnalyzer.Instance.LastAlgorithmStepTime =
                     AlgorithmManager.Instance.Stopwatch.ElapsedMilliseconds;
 
+                s.Stop();
+
                 SpecialSearchTime += s.ElapsedMilliseconds;
+
+#endif
 
                 if (CheckedSpecialSquare != null)
                     CheckedSpecialSquare.Invoke(isWalkable, sw_point);
